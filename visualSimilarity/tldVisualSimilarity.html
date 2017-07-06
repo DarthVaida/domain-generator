@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD W3 HTML 2.0//EN">
+<HTML lang="en-US">
+<HEAD>
+<TITLE>Compute Visual Similarity of Top-Level Domains</TITLE>
+<!-- turn off Microsoft's added smart tags -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+</HEAD>
+<BODY>
+
+<center>
+<a href="http://www.nist.gov/"><img
+src="/~black/Images/webidblue_1linecentr.gif" border=0 height=43 width=229
+alt="NIST"></a>
+<H2>Special Project</H2>
+<H1>Compute Visual Similarity of Top-Level Domains</H1>
+</center>
+
+<!-- body of tld Visual Similarity page -->
+
+<p> 
+Compute the visual similarity between a possible new Generic Top-Level
+Domain (TLD) and other proposed TLDs, current TLDs, and reserved
+words.
+</p>
+
+<p>
+This web site describes and uses experimental software developed at
+the National Institute of Standards and Technology (NIST).
+No algorithms, code, or descriptions in whole or in part are
+recommended, used, or endorsed by the Internet Corporation for
+Assigned Names and Numbers (ICANN) or any other entity.
+</p>
+
+<hr>
+
+<H2>Compare Against All</H2>
+
+<p>
+Compare a string to other proposed TLDs, <a
+href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://www.iana.org/domains/root/db/">current
+    TLDs</a>, including country codes, and reserved words.
+</p>
+
+<form action="/cgi-bin/black/GTLD/visimiToAll.py" method=post>
+Proposed Top-Level Domain: <input name=pgtld type=text size=10>
+<input type=submit value="compare">
+</form>
+
+<p>
+Note: All characters other than 0-9, a-z, A-Z, and hyphen (-) are removed.
+</p>
+
+<hr>
+
+<H2>Compare Two Strings</H2>
+
+<p>
+Compare two strings to each other.
+</p>
+
+<form action="/cgi-bin/black/GTLD/visimiGauge.py" method=post>
+String 1: <input name=string1 type=text size=10><br>
+String 2: <input name=string2 type=text size=10><br>
+<input type=submit value="compare these">
+</form>
+
+<p>
+Note: All characters other than 0-9, a-z, A-Z, and hyphen (-) are removed.
+</p>
+
+<hr>
+
+<H3>Background</H3>
+
+<p>
+Computers connect the Internet with numbers, IP addresses.  However,
+people use strings ending in short segments like .edu, .uk, .tv, and
+.com, called Top-Level Domains (TLDs) to navigate the World Wide
+Web.  Ensuring
+the ongoing security and stability of the Domain Name System is one
+activity of the Internet Corporation for Assigned Names and Numbers
+(ICANN).  With the growth of the Web, there is a possibility of a lot
+of new TLDs.
+As one method to implement the recommendation that, "Strings
+must not be confusingly similar to an existing top-level domain ...",
+this web page invokes an algorithm developed at NIST "to provide an
+open, objective, and predictable mechanism for assessing the degree of
+visual confusion" between proposed or existing TLDs.
+</p>
+
+<p>
+The algorithm takes into
+account varying degrees of similarity between some 60 pairs,
+like 0 and O (zero and oh), 1 and l (one and L), Z and 2, h and n, rn
+(R and N) and m, and w
+and vv (v v).  Even insertions or deletions may cause confusion, for
+example .aaaah and .aaaaah look very much alike.  The task is all the
+more challenging because domain names are not case sensitive.
+</p>
+
+<p>
+Does such confusion happen in real life?
+Here's a piece of text from my screen.  I actually read the
+second line as "w a m s", not "w a r n s", even though "wams" is not a
+word!
+</p>
+
+<center>
+<img src="warns_not_wams.jpg">
+</center>
+
+<p>
+Note that the algorithm is not meant to consider phonetic similarity.
+For example, "fish", "phish", and "fiche" sound alike, but are visually
+distinct and
+unlikely to be confused.
+</p>
+
+<h3>Web Interface</h3>
+
+<p>
+The first form has the algorithm compare a string against
+proposed generic TLDs, existing TLDs, including country codes, and
+reserved words.  It reports exact matches, near matches, and best
+matches if there are no near matches.
+</p>
+
+<p>
+The second form uses the algorithm to compare two strings against each
+other.
+</p>
+
+<p>
+Only alphabetic characters (a-z and A-Z), numerals (0-9),
+and hyphens (-) are allowed in
+strings.  See 
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://www.faqs.org/rfcs/rfc1035.html">RFC 1035 2.3.1</a>.
+</p>
+
+
+<H3>The Code and The Algorithm</H3>
+
+<p>
+The score is an enhanced
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein
+distance</a> that is adjusted for length and normalized.
+Some other possibilities for distance measures are
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://en.wikipedia.org/wiki/Jaro-Winkler">Jaro-Winkler</a>,
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://en.wikipedia.org/wiki/Damerau-Levenshtein_distance">Damerau-Levenshtein</a>,
+cosine distance, and many others.
+</p>
+
+<p>
+The code is written in
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://www.python.org/">Python</a>.
+The interface to the algorithm itself is a single function,
+howConfusableAre().  It takes two parameters: the two strings to be
+compared.
+</p>
+
+<p>
+HowConfusableAre() calls levenshtein()
+to compute a form of edit difference, then normalizes the score and
+accounts for string lengths.
+</p>
+
+<p>
+Levenshtein() takes two strings.  It is an enhanced Levenshtein
+distance algorithm that accounts for substituting two
+characters by one (or vice versa), inserting an additional repeated
+character, and transposition, as well as the usual insertion,
+deletion, and substitution.
+The result is roughly the number of visual differences
+between the strings.  I say "roughly" because substituting O (upper
+case letter "o") for 0 (zero) is a much smaller difference than
+substituting, say, w for t.  Levenshtein() calls two routines to find
+similarity, and hence cost, for substituting or transposing characters
+or "digraph" (character pairs): characterSimilarity() and
+digraphSimilarity().
+</p>
+
+<p>
+Both characterSimilarity() and digraphSimilarity() take two strings
+(single characters in the case of characterSimilarity()).  Both work
+much the same way: look up 
+the passed strings in a table.  If they are in the table, return the
+value in the table.  If not, use the default: 0 means completely
+different and 1 means identical.
+</p>
+
+<p>
+The code, data, and automatic test material are in the file
+<a href="visualSimilarity.tar">visualSimilarity.tar</a>, which is a
+<a href="http://www.nist.gov/cgi-bin/exit_nist.cgi?url=http://en.wikipedia.org/wiki/Tar_(file_format)">tar file</a>.
+</p>
+
+<H3>Cautions</H3>
+
+<p>
+The algorithm, consisting of the distance measure, the scoring
+formula, and the character similarities are mostly just my
+estimations.  Several people have looked at resulting scores.  I
+adjusted the formula and a few weights to correspond with feedback.
+Still the algorithm has not been systematically or independently
+validated.
+</p>
+
+<HR>
+
+<EM>Web page<br>Created Tue Feb  5 16:49:10 2008
+</EM><ADDRESS>
+by <a href="/~black/">Paul E. Black</a>
+&nbsp;(<a href="mailto:paul.black@nist.gov">paul.black@nist.gov</a>)
+</ADDRESS>
+<EM>Updated
+Fri May 30 09:03:17 2008
+</EM><ADDRESS>
+by <a href="http://hissa.nist.gov/~black/">Paul E. Black
+</a>
+&nbsp;(<a href="mailto:paul.black@nist.gov">paul.black@nist.gov</a>)
+</ADDRESS>
+
+<!-- web page footer -->
+
+<HR>
+
+<TABLE width="100%">
+<TR valign="top">
+  <TD align="right">
+    <font size="-3">
+      <em>Contact:&nbsp; 
+	<a href="mailto:webmaster@nist.gov">webmaster@nist.gov</a></em>
+    <br>
+      <a href="http://www.nist.gov/public_affairs/privacy.htm">PRIVACY/SECURITY
+	ISSUES</a>
+    <br>
+      <a href="http://www.nist.gov/admin/foia/foia.htm">FOIA</a>
+     &bull;
+      <a href="http://www.nist.gov/public_affairs/disclaim.htm">Disclaimer</a>
+     &bull;
+      <a href="http://www.usa.gov/">USA.gov</a>
+    </font>
+  </TD>
+  <TD>
+    <font size="-3">
+      <a href="http://www.itl.nist.gov/">Information
+      Technology Laboratory</a>
+    <br>
+      <a href="http://www.itl.nist.gov/div897/">Software and Systems
+      Division</a>
+    <br>
+      <a href="http://www.nist.gov" title="National Institute of
+      Standards and Technology">NIST</a> is an agency of the <a
+      href="http://www.doc.gov" title="Department of
+      Commerce">U.S. Commerce Department</a>
+    </font>
+   </TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

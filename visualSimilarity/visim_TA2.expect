@@ -1,0 +1,120 @@
+Content-Type: text/html
+
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD W3 HTML 2.0//EN">
+<HTML>
+<HEAD>
+<TITLE>Visual Similarity of a String to Other TLDs, etc.</TITLE>
+<!-- turn off Microsoft's added smart tags -->
+<meta name="MSSmartTagsPreventParsing" content="TRUE">
+</HEAD>
+<BODY>
+
+<center>
+<a href="http://www.nist.gov/"><img
+src="/~black/Images/webidblue_1linecentr.gif" border=0 height=43 width=229
+alt="NIST"></a>
+<H2>Special Project</H2>
+<H1>Compute Visual Similarity of Top-Level Domains</H1>
+</center>
+
+
+
+<p>
+You entered
+</p>
+
+<H3>.ICANN</H3>
+
+<H2>Quite Similar String(s)</H2>
+
+<p>Following are the proposed and existing Top-Level Domains and reserved words that are visually quite similar to .ICANN </p>
+
+<p>.ICANN is a reserved name and is not allowed</p>
+
+
+<TABLE cellspacing="0" border>
+<TR>
+ <TH>Applicant String</TH><TH>Indexed String</TH><TH>% Score</TH>
+</TR>
+
+<TR>
+  <TD>.ICANN</TD><TD>.AM</TD><TD align="right"> 13%</TD>
+</TR>
+<TR>
+  <TD>.ICANN</TD><TD>.CM</TD><TD align="right"> 13%</TD>
+</TR>
+<TR>
+  <TD>.ICANN</TD><TD>.COM</TD><TD align="right"> 18%</TD>
+</TR>
+<TR>
+  <TD>.ICANN</TD><TD>.IM</TD><TD align="right"> 13%</TD>
+</TR>
+<TR>
+  <TD>.ICANN</TD><TD>.ICANN</TD><TD align="right">100%</TD>
+</TR>
+
+</TABLE>
+<HR>
+
+You can enter more strings by returning to
+<a href="http://hissa.nist.gov/~black/GTLD/tldVisualSimilarity.html">Compute
+Visual Similarity</a> page.
+
+
+<HR>
+
+<EM>Created Mon Mar 24 15:50:28 2008
+</EM><ADDRESS>
+by <a href="/~black/">Paul E. Black</a>
+&nbsp;(<a href="mailto:paul.black@nist.gov">paul.black@nist.gov</a>)
+</ADDRESS>
+<EM>Updated
+
+</EM><ADDRESS>
+by <a href="http://hissa.nist.gov/~black/">Paul E. Black
+</a>
+&nbsp;(<a href="mailto:paul.black@nist.gov">paul.black@nist.gov</a>)
+</ADDRESS>
+
+<!-- web page trailer -->
+
+<HR>
+
+<TABLE width="100%">
+<TR valign="top">
+  <TD align="right">
+    <font size="-3">
+      <em>Contact:&nbsp; 
+	<a href="mailto:webmaster@nist.gov">webmaster@nist.gov</a></em>
+    <br>
+      <a href="http://www.nist.gov/public_affairs/privacy.htm">PRIVACY/SECURITY
+	ISSUES</a>
+    <br>
+      <a href="http://www.nist.gov/admin/foia/foia.htm">FOIA</a>
+     &bull;
+      <a href="http://www.nist.gov/public_affairs/disclaim.htm">Disclaimer</a>
+     &bull;
+      <a href="http://www.usa.gov/">USA.gov</a>
+    </font>
+  </TD>
+  <TD>
+    <font size="-3">
+      <a href="http://www.itl.nist.gov/">Information
+      Technology Laboratory</a>
+    <br>
+      <a href="http://www.itl.nist.gov/div897/">Software and Systems
+      Division</a>
+    <br>
+      <a href="http://www.nist.gov" title="National Institute of
+      Standards and Technology">NIST</a> is an agency of the <a
+      href="http://www.doc.gov" title="Department of
+      Commerce">U.S. Commerce Department</a>
+    </font>
+   </TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>
+

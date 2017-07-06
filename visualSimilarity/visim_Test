@@ -1,0 +1,325 @@
+#! /usr/bin/perl -w
+# $Id: visim_Test,v 1.11 2008/05/15 19:39:21 black Exp $
+# *created  "Fri Dec 21 15:15:08 2007" *by "Paul E. Black"
+# *modified "Thu May 15 15:38:13 2008" *by "Paul E. Black"
+#
+#	Automatic test for visimilarity.py
+#
+# This software was developed at the National Institute of Standards 
+# and Technology by employees of the Federal Government in the course 
+# of their official duties.  Pursuant to title 17 Section 105 of the 
+# United States Code this software is not subject to copyright 
+# protection and is in the public domain.  This software is an
+# experimental system.  NIST assumes no responsibility whatsoever for
+# its use by other parties, and makes no guarantees, expressed or
+# implied, about its quality, reliability, or any other
+# characteristic.
+#
+# We would appreciate acknowledgment if this software is used.
+#
+# This software may be redistributed and/or modified freely provided
+# that any modified versions bear some notice that they were modified.
+#
+# Paul E. Black paul.black@nist.gov
+
+use File::Basename;
+use Sys::Hostname;
+
+$progname = "./visimilarity.py";
+$progbase = basename($progname, "");
+chop ($progdir = `pwd`); # to test invocation from a different directory
+
+#------------------------------------------------------------------------------
+# Create the "fail safe" error file
+#------------------------------------------------------------------------------
+
+# name of error file - it is long so it is harder to overlook
+$errfile = "ERROR_${progbase}_FAILED_BUILTIN_TEST";
+
+$now = localtime;
+$host = hostname();
+
+# create fail safe error file in case this script fails
+unlink($errfile); # so we can write it
+open(ERRFILE, "> $errfile")
+	|| die "Cannot open error file: $errfile, stopped";
+print ERRFILE "test of $progname begun in $progdir on $now on $host\n";
+close(ERRFILE);
+
+$errors = 0;
+
+open(ERRFILE, ">> $errfile")
+	    || die "Cannot open error file to append: $errfile, stopped";
+
+# use the test reserved names
+unlink("reservedNames");
+$testReservedNamesFile = "visim_TresNames";
+if (! -r $testReservedNamesFile) {
+    die "Cannot read test reserved names file, $testReservedNamesFile, stopped";
+}
+symlink($testReservedNamesFile, "reservedNames")
+	|| die "Cannot create symbolic link to test reserved names file, $testReservedNamesFile, stopped";
+
+#############################################################################
+# User interface tests
+#############################################################################
+
+print "Checking command line options\n";
+
+# help options
+foreach $opt ("-h", "--h", "-he", "--hel", "-help", "--help") {
+    $cmd = "$progname $opt 2>&1";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    # output should only be Usage and help message
+    if (($output !~ /^Usage: /) || ($output !~ /where/)) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+    }
+}
+
+# invalid options
+foreach $opt ("-z", "--you") {
+    $cmd = "$progname $opt 2>&1";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    if ($output !~ /unknown option: /) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+    }
+}
+
+# check number of operands
+foreach $opt ("one two three") {
+    $cmd = "$progname $opt 2>&1";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    # output should have Usage information
+    if ($output !~ /Usage: /) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+    }
+}
+
+# version
+foreach $opt ("-v", "--ve", "-ver", "--vers", "-versi", "--version") {
+    $cmd = "$progname $opt 2>&1";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    # output should have program name, RCS keyword, "using", and "*modified"
+    if (($output !~ /^visimilarity/) || ($output !~ /\$Id: /)
+		|| ($output !~ / using/) || ($output !~ /[*]modified /)) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+    }
+}
+
+#############################################################################
+# behavioral tests
+#############################################################################
+
+print "Checking function of $progname\n";
+
+# check pairs of strings (and other stuff ...)
+$outFile = "visim_Tpairs.out";
+$expectedOutFile = "visim_Tpairs.expect";
+unlink($outFile); # make sure there's no outFile to start
+for ($testNo = 1; $testNo <= 9; $testNo++) {
+    if ($testNo == 1) {
+	$cmdline = "apple opel";
+    } elsif ($testNo == 2) {
+	$cmdline = "-- biz bz";
+    } elsif ($testNo == 3) {
+	$cmdline = "COM C0M";
+    } elsif ($testNo == 4) {
+	$cmdline = "com corn";
+    } elsif ($testNo == 5) {
+	$cmdline = "--oth visim_Tempty";
+    } elsif ($testNo == 6) {
+	$cmdline = "wiifi wiiifi"; # 2 matched to 3
+    } elsif ($testNo == 7) {
+	$cmdline = "wwwwt wwt"; # 4 matched to 2
+    } elsif ($testNo == 8) {
+	$cmdline = "1479666 14796666"; # 3 matched to 4
+    } elsif ($testNo == 9) {
+	$cmdline = "misSssSippi miSsssipPi"; # 5 matched to 4
+    }
+    $cmd = "$progname $cmdline 2>&1|tee -a $outFile";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    if ($? != 0) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+	next;
+    }
+}
+
+# check the result
+$cmd = "diff $outFile $expectedOutFile";
+print ERRFILE "$cmd\n";
+$doutput = `$cmd`;
+if ($? != 0) {
+    $errors++;
+    print "$doutput";
+    print ERRFILE "run produced\n";
+    print ERRFILE "$output\n";
+    print ERRFILE "$cmd produced\n";
+    print ERRFILE "$doutput\n";
+} else {
+    # get rid of output file
+    unlink($outFile);
+}
+
+
+for ($testNo = 1; $testNo <= 7; $testNo++) {
+    $outFile = "visim_T$testNo.out";
+    $expectedOutFile = "visim_T$testNo.expect";
+    if ($testNo == 1) {
+	$cmdline = "--Test";
+    } elsif ($testNo == 2) {
+	$cmdline = "-- --version";
+    } elsif ($testNo == 3) {
+	$cmdline = "-o visim_Tnames example";
+    } elsif ($testNo == 4) {
+	$cmdline = "name";
+    } elsif ($testNo == 5) {
+	$cmdline = "aA";
+    } elsif ($testNo == 6) {
+	$cmdline = "--other visim_Tnames";
+    } elsif ($testNo == 7) {
+	# cross compare all
+	$cmdline = "-ot visim_Tnames --cross";
+    }
+    $cmd = "$progname $cmdline 2>&1|tee $outFile";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    if ($? != 0) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+	next;
+    }
+
+    # check the result
+    $cmd = "diff $outFile $expectedOutFile";
+    print ERRFILE "$cmd\n";
+    $doutput = `$cmd`;
+    if ($? != 0) {
+	$errors++;
+	print "$doutput";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+	print ERRFILE "$cmd produced\n";
+	print ERRFILE "$doutput\n";
+	next;
+    }
+
+    # get rid of output file
+    unlink($outFile);
+}
+
+#############################################################################
+#	Minimal behavioral tests of visimiToAll
+#############################################################################
+
+$prognameA = "./visimiToAll.py";
+
+print "Checking function of $prognameA\n";
+
+# regular expression to match a date for removal (so we don't have
+# to update stuff every time a date changes)
+$dateRE = "^(Sun|Mon|Tue|Wed|Thu|Fri|Sat) .* 20\\d\\d";
+
+for ($testNo = 1; $testNo <= 2; $testNo++) {
+    $outFile = "visim_TA$testNo.out";
+    $expectedOutFile = "visim_TA$testNo.expect";
+    if ($testNo == 1) {
+	$cmdline = "burn";
+    } elsif ($testNo == 2) {
+	$cmdline = "ICANN";
+    }
+    $cmd = "$prognameA $cmdline 2>&1|perl -pwe 's/$dateRE//'|tee $outFile";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    if ($? != 0) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+	next;
+    }
+
+    # check the result
+    $cmd = "diff $outFile $expectedOutFile";
+    print ERRFILE "$cmd\n";
+    $doutput = `$cmd`;
+    if ($? != 0) {
+	$errors++;
+	print "$doutput";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+	print ERRFILE "$cmd produced\n";
+	print ERRFILE "$doutput\n";
+	next;
+    }
+
+    # get rid of output file
+    unlink($outFile);
+}
+
+#------------------------------------------------------------------------------
+# remove the error file if no errors found
+#------------------------------------------------------------------------------
+
+close(ERRFILE);
+
+if ($errors == 0) {
+    # test finished successfully, remove error file
+    unlink($errfile)
+	|| die "Test passed, but cannot unlink error file: $errfile\n";
+    exit 0;
+}
+
+# some error was found
+exit 1;
+
+#      UNUSED CODE WHICH MAY BE USEFUL
+# choose a file which is NOT present
+$missingFile = "thisFileShouldNeverExistForTests";
+if (-e $missingFile) {
+    $errors++;
+    print "Test will be inaccurate: $missingFile exists\n";
+    print ERRFILE "Test will be inaccurate: $missingFile exists\n";
+}
+foreach $cmdargs ("$missingFile") {
+    $cmd = "$prognameA $cmdargs 2>&1";
+    print ERRFILE "$cmd\n";
+    $output = `$cmd`;
+    if ($output !~ /no such file/i) {
+	$errors++;
+	print "$cmd\n";
+	print "$output";
+	print ERRFILE "run produced\n";
+	print ERRFILE "$output\n";
+    }
+}
+
+# end of $Source: /home/black/GTLD/RCS/visim_Test,v $

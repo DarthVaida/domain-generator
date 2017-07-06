@@ -1,0 +1,130 @@
+Notes for visual similarity algorithm.
+
+ *created  "Fri Feb 22 16:28:32 2008" *by "Paul E. Black"
+ *modified "Tue May 13 16:52:25 2008" *by "Paul E. Black"
+
+This directory has three types of files:
+  * code (in Python)
+  * data files: reserved words and existing TLDs
+  * automatic test code and files
+
+Compute how visually similar a string is to reserved words, existing
+TLDs, and other proposed generic TLDs by passing it to
+visimilarity.py.  For instance, "rosebud" is compared with
+  $ ./visimilarity.py rosebud
+
+If no string is given, all proposed generic TLDs are compared to
+reserved words and existing TLDs.  For instance,
+  $ ./visimilarity.py
+
+You can compare all proposed generic TLDs to each other with the
+--cross-check option.  You can get the strings from an arbitrary file
+with the --other_gTLDs option.  For instance,
+  $ ./visimilarity.py --other testWords --cross
+
+You can compare how visually similar two strings are to each other.
+For instance, compare "apple" to "opel" with
+  $ ./visimilarity.py apple opel
+
+
+SELF-TESTS
+
+There are two kinds of self-tests: those built into the code itself
+and external automated tests.  Run the built-in tests with
+  $ ./visimilarity.py --Test
+It produces a whole bunch of stuff, so it is not helpful to the casual
+user.
+
+The external self-tests probably need a Linux environment.  Run the
+external self-tests with
+  $ ./visim_Test
+Visim_Test is a script that runs visimilarity.py many different ways
+and checks the results.  Some tests, like the user interface and
+options, are checked directly in the script.  Functionality tests
+save the result in a file, with the extension .out, and compare it
+with the expected result, with the extension .expect.  Here what you
+should see:
+  $ ./visim_Test
+  Checking command line options
+  Checking function
+Anything else means it is running differently for you than for me.
+
+
+THE CODE AND ALGORITHM
+
+The code is in visimilarity.py, charSimilarity.py, strSimilarity.py,
+and visimiCommon.py.  Visimilarity.py processes the command line,
+reads the files with reserved words, existing TLDs, and proposed
+generic TLDs, compares whatever strings are appropriate, and reports
+the results.
+
+The interface to the algorithm itself is a single function,
+howConfusableAre().  It takes two parameters: the two strings to be
+compared.
+
+StrSimilarity.py contains howConfusableAre().  It calls levenshtein()
+to compute a form of edit difference, then normalizes the score and
+accounts for string lengths.
+
+Levenshtein() takes two strings.  It is an an enhanced
+Levenshtein-Damerau algorithm that accounts for substituting two
+characters by one (or vice versa) and inserting an additional repeated
+character, as well as the usual insertion, deletion, substitution, and
+transposition.  The result is roughly the number of visual differences
+between the strings.  I say "roughly" because substituting O (upper
+case letter "o") for 0 (zero) is a much smaller difference than
+substituting w for t.  Levenshtein() calls two routines to find
+similarity, and hence cost, for substituting or transposing characters
+or "digraph" (character pairs): characterSimilarity() and
+digraphSimilarity().
+
+CharSimilarity.py contains both characterSimilarity() and
+digraphSimilarity().  Both take two strings (single characters in the
+case of characterSimilarity()).  Both work much the same way: look up
+the passed strings in a table.  If they are in the table, return the
+value in the table.  If not use the default: 0 means completely
+different and 1 means identical.
+
+The tables are only guaranteed to contain the lower case version of a
+pair.  Although the upper case characters P and R are visually
+similar, all strings are changed to lower case and p and r are looked
+up.  What if we compare r and p?  Rather than put all
+possibilities in the table, the comparison routines check for 
+(s1, s2) then (s2, s1), in case the pair is in "backward".  (It would
+be easy enough to change the table initialization to make sure both
+ways are in the table.  This would allow the look up routine to be a
+little simpler and faster.)
+
+These four functions, howConfusableAre(), levenshtein(),
+characterSimilarity() and digraphSimilarity(), are the heart of the
+algorithm.  There is more built-in self-test code than code to be
+tested.
+
+Notes on enhancements and properties of the algorithm (case
+insensitive, symmetric, longer words are more similar than shorter
+words, etc.) are located in the code close to the places that need to
+incorporate them.
+
+VisimiCommon.py has a few common definitions and utility functions.
+
+
+THE WEB SITE
+
+As of 3 April 2008 the web site is
+    http://hissa.nist.gov/~black/GTLD/tldVisualSimilarity.html
+This is an interface to either compare a string with all current
+TLDs and reserved words or compare two strings with each other.
+
+
+
+This was written at the National Institute of Standards and Technology
+by employees of the Federal Government in the course of their official
+duties.  Pursuant to title 17 Section 105 of the United States Code
+this is not subject to copyright protection and is in the public
+domain.
+
+We would appreciate acknowledgment if this software is used.
+
+-paul-
+Paul E. Black
+paul.black@nist.gov

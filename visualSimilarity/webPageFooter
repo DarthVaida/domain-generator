@@ -1,0 +1,40 @@
+<!-- web page footer -->
+
+<HR>
+
+<TABLE width="100%">
+<TR valign="top">
+  <TD align="right">
+    <font size="-3">
+      <em>Contact:&nbsp; 
+	<a href="mailto:webmaster@nist.gov">webmaster@nist.gov</a></em>
+    <br>
+      <a href="http://www.nist.gov/public_affairs/privacy.htm">PRIVACY/SECURITY
+	ISSUES</a>
+    <br>
+      <a href="http://www.nist.gov/admin/foia/foia.htm">FOIA</a>
+     &bull;
+      <a href="http://www.nist.gov/public_affairs/disclaim.htm">Disclaimer</a>
+     &bull;
+      <a href="http://www.usa.gov/">USA.gov</a>
+    </font>
+  </TD>
+  <TD>
+    <font size="-3">
+      <a href="http://www.itl.nist.gov/">Information
+      Technology Laboratory</a>
+    <br>
+      <a href="http://www.itl.nist.gov/div897/">Software and Systems
+      Division</a>
+    <br>
+      <a href="http://www.nist.gov" title="National Institute of
+      Standards and Technology">NIST</a> is an agency of the <a
+      href="http://www.doc.gov" title="Department of
+      Commerce">U.S. Commerce Department</a>
+    </font>
+   </TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>
