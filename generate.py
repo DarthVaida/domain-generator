@@ -81,9 +81,18 @@ def getPossibleChars():
  	while i < len(map)-1:
  		count = 0
  		left = 0 if i==1 else map[i-2][2]
-
- 		while map[i+count][2] == map[i+count-1][2]:
- 			count+=1
+ 	
+ 		
+ 	
+ 		while (map[i+count][2] == map[i+count-1][2]):			
+ 			if count+i == len(map)-1:
+ 				break
+ 			else:
+ 				count+=1
+ 			print count+i
+ 			print len(map)
+ 			
+ 		
  		right = map[i+count][2]
  		c = count
  		while (map[i+count-1][2]>left) & (map[i+count-1][2]<right) & (count>=0):
