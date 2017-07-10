@@ -12,7 +12,8 @@ import gc as gc
 #  ===========================================================================
 #  Construct a list of strings that are visually similar to the given input 
 #  Usage: generate.py string 												  
-#  Options: -v  = Verbose (it's probably too Verbose)
+#  Options: -v = Verbose (it's probably too Verbose)
+#           -d = Domain verification via whois
 #  ===========================================================================
 
 class bcolors:
@@ -89,9 +90,6 @@ def getPossibleChars():
  				break
  			else:
  				count+=1
- 			print count+i
- 			print len(map)
- 			
  		
  		right = map[i+count][2]
  		c = count
@@ -340,6 +338,7 @@ def getWord(word,listOfSubs):
 # Validation
 # Re-order the results according to NIST's tool
 def validateResults():
+	global domainResolution
 	# Counter
 	c = 0
 	for i in sorted(results.items(),key=operator.itemgetter(1), reverse=True):
@@ -354,12 +353,18 @@ def validateResults():
 	# We don't need the huge @results anymore
 	# Hope for the best
 	gc.collect()
-	for i in sorted(validatedResults.items(),key=operator.itemgetter(1), reverse=True):
-		print checkAvailability(i[0]+".com"),str(i[1])+"%"
-		print checkAvailability(i[0]+".co.uk"),str(i[1])+"%"
-		print checkAvailability(i[0]+".uk"),str(i[1])+"%"
+	if domainResolution :
+		checkAvailableDomains()
 
-	
+def checkAvailableDomains():
+	try:
+		for i in sorted(validatedResults.items(),key=operator.itemgetter(1), reverse=True):
+			print checkAvailability(i[0]+".com"),str(i[1])+"%"
+			print checkAvailability(i[0]+".co.uk"),str(i[1])+"%"
+			print checkAvailability(i[0]+".uk"),str(i[1])+"%"	
+	except KeyboardInterrupt:
+		print "\nExiting script. Bye!" 
+
 def checkAvailability(domain):
 	whoisout = os.popen("whois "+domain).read()
 	regex = re.compile("This domain name has not been registered.")
@@ -370,18 +375,8 @@ def checkAvailability(domain):
 	time.sleep(1)
 	return s
 
-#TO-DO			
-# Look for .com .uk .co.uk 
-# Grep the results
-def checkAvailableDomains():
-	# Counter
-	c = 0
-	for i in sorted(results.items(),key=operator.itemgetter(1), reverse=True):
-		#print i[0], i[1]
-		os.system("whois "+str(i[0])+".com")
-		c+=1
-		if (c == maxResults) | (i[1] < minDisplayRating):
-			break
+
+
 ############################################################################
 # Main method
 ############################################################################
@@ -389,45 +384,57 @@ def checkAvailableDomains():
 
 def main():
 	global results
-	results = {}
 	global validatedResults
+	global maxResults
+	global minDisplayRating
+	global cutoff
+	global Verbose
+	global domain
+	global domainResolution
+	global scale
+	global minimumRating
+	global chars
+	global target
+	global m	
+
+
+	results = {}
 	validatedResults = {}
 	# Maximum number of results to be displayed
-	global maxResults
 	maxResults = 30
 	# Minimum rating required for results to be displayed
-	global minDisplayRating
 	minDisplayRating = 0.2	
 	# Defines the number of allowed substitutions
-	global cutoff
 	cutoff = 2
+	# Scale things up to apply coin changing algorithm
+	scale = 100
+	minimumRating = 0.2
+	# Look for possible character substitutions in the provided domain
+	target = 200
+
+
+
+
 	# Param handling
-	global Verbose
+	# ================================================================
 	Verbose = False
-	global domain
+	domainResolution = False
 	domain = sys.argv[1]
+
 	for i in range(2, len(sys.argv)):
 		if sys.argv[i] == '-v':
 			Verbose = True
 			print "Verbose mode on."
+		if sys.argv[i] == '-d':
+			domainResolution = True
 
-	# Scale things up to apply coin changing algorithm
-	global scale
-	scale = 100
 
-	global minimumRating
-	minimumRating = 0.2
-	# Look for possible character substitutions in the provided domain
-	global chars
+	
 	chars = getPossibleChars()
 	if Verbose:
 		print chars
-	
-	numOfChars = len(chars)
-	global target
-	target = 200
-	global m
-	m = (numOfChars,target+1)
+
+	m = (len(chars),target+1)
 	m = np.zeros(m)
 
 
