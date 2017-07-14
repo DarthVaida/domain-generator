@@ -51,7 +51,7 @@ scsimtab = {
 	('0', 'O'):	.9,
 	('1', '7'):	.5,	# for European 1s
 	('1', 'i'):	.9,	# in some fonts
-	('1', 'l'):	1,	# identical in some fonts
+	('1', 'l'):	.96,	# identical in some fonts
 	('2', 'Z'):	.2,
 	('3', 'E'):	.1,	# maybe?
 	('4', 'A'):	.1,	# in some fonts
@@ -88,7 +88,7 @@ scsimtab = {
 	('h', 'n'):	.4,
 	#('H', 'N'):	.2, more similar as lower case, so ignore
 	('i', 'j'):	.5,	# in some fonts
-	('I', 'l'):	1,	# identical in some fonts
+	('I', 'l'):	.97,	# identical in some fonts
 	('K', 'X'):	.1,
 	('m', 'n'):	.1,	# proportional fonts
 	('n', 'r'):	.1,
@@ -112,7 +112,7 @@ dcsimtab = {
     ('mn', 'nm'):	.5,	# in proportional fonts
     ('nn', 'm'):	.5,	# in proportional fonts
     ('AA', 'M'):	.2,
-    ('rn', 'm'):	1,	# I misread "warns" as "wams" once!
+    ('rn', 'm'):	.98,	# I misread "warns" as "wams" once!
     ('VV', 'W'):	.8,	# in proportional fonts
 }
 

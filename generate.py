@@ -5,6 +5,7 @@ import numpy as np
 import copy as copy
 import sys
 from visualSimilarity import charSimilarity
+import aux
 import operator
 import os as os
 import gc as gc
@@ -33,21 +34,32 @@ def getPossibleChars():
 	map = []
 	for i in charSimilarity.scsimtab:		
 		tmp.append([i[0],i[1],charSimilarity.scsimtab[i[0],i[1]]])
+	for i in charSimilarity.dcsimtab:	
+		tmp.append([i[0],i[1],charSimilarity.dcsimtab[i[0],i[1]]])
 	#testPossibleChars(tmp)
 	
 	# Can't use a dictionary here because of duplicate value mappings: i.e. 1 can be substituted with i,l,etc. 
 	# Just do it nice and slow ..
 	# Look for possible substitution candidates in the given string
-	for i in domain:
-		for j in tmp:
+	
+
+	for j in tmp:
+		regex = re.compile(j[0])
+		candidateChars = regex.findall(domain)
+		if candidateChars == []:
+			regex = re.compile(j[1])
+			candidateChars = regex.findall(domain)
+
+
+		for i in range (0,len(candidateChars)):
 			# Don't bother with low values. Characters not very similar and will make the computation longer.
 			# Decrease the minimumRating value if the script returns too few results
 			if j[2] >= minimumRating:
-				if 	(i == j[0]) & ([j[0],j[1],int(j[2]*scale)] not in map):
-					map.append([j[0],j[1],int(j[2]*scale)])
-				elif (i ==j[1]) & ([j[1],j[0],int(j[2]*scale)] not in map):
+				if 	(candidateChars[i] == j[0]) & ([j[0],j[1],int(j[2]*scale),i] not in map):
+					map.append([j[0],j[1],int(j[2]*scale),i])
+				elif (candidateChars[i] ==j[1]) & ([j[1],j[0],int(j[2]*scale),i] not in map):
 					# Swap the order
-					map.append([j[1],j[0],int(j[2]*scale)])
+					map.append([j[1],j[0],int(j[2]*scale),i])
 			
 	# Create a map in the following format:
 	# [Character, Substitute, Similarity]
@@ -234,6 +246,7 @@ def reconstruct(i,j,listOfSubs):
 			if len(listOfSubs) != 0 :
 				#print getWord(domain,listOfSubs),getCombinationRating(listOfSubs)
 				results[getWord(domain,listOfSubs)] = getCombinationRating(listOfSubs)
+		print listOfSubs
 		return
 
 	if i==0 :
@@ -252,6 +265,7 @@ def reconstruct(i,j,listOfSubs):
 			if len(listOfSubs) != 0 :
 				#print getWord(domain,listOfSubs),getCombinationRating(listOfSubs)
 				results[getWord(domain,listOfSubs)] = getCombinationRating(listOfSubs)
+		print listOfSubs
 		return
 
 
@@ -276,6 +290,7 @@ def reconstruct(i,j,listOfSubs):
 			if len(listOfSubs) != 0 :
 				#print getWord(domain,listOfSubs),getCombinationRating(listOfSubs)
 				results[getWord(domain,listOfSubs)] = getCombinationRating(listOfSubs)
+		print listOfSubs
 		return
 
 		# If the value above is 0, the path came from the left
@@ -308,7 +323,7 @@ def reconstruct(i,j,listOfSubs):
 		if Verbose:
 			print "\t3.2 -- Jump left",i,j,m[i-1][j],1+ m[i][j-chars[i][2]]
 		reconstruct(i-1,j,listOfSubs)
-
+# BUG HERE? jump left or up ? what's the right way
 
 		# Value can come from both directions.
 		# Recurse both ways
@@ -355,9 +370,15 @@ def validateResults():
 	gc.collect()
 	if domainResolution :
 		checkAvailableDomains()
+	else:
+		printResults()
 
 def checkAvailableDomains():
 	try:
+		print checkAvailability(domain+".com"),"100%"
+		print checkAvailability(domain+".co.uk"),"100%"
+		print checkAvailability(domain+".uk"),"100%"	
+		
 		for i in sorted(validatedResults.items(),key=operator.itemgetter(1), reverse=True):
 			print checkAvailability(i[0]+".com"),str(i[1])+"%"
 			print checkAvailability(i[0]+".co.uk"),str(i[1])+"%"
@@ -366,14 +387,19 @@ def checkAvailableDomains():
 		print "\nExiting script. Bye!" 
 
 def checkAvailability(domain):
+	time.sleep(1)
 	whoisout = os.popen("whois "+domain).read()
 	regex = re.compile("This domain name has not been registered.")
 	if regex.search(whoisout):
-		s = bcolors.OKGREEN+domain+"\t- available"+bcolors.ENDC
-	else:
-		s = bcolors.FAIL+domain+"\t- unavailable"+bcolors.ENDC
-	time.sleep(1)
-	return s
+		return bcolors.OKGREEN+domain+"\t- available"+bcolors.ENDC
+	regex = re.compile("No match for domain \"")
+	if regex.search(whoisout):
+		return bcolors.OKGREEN+domain+"\t- available"+bcolors.ENDC	
+	return bcolors.FAIL+domain+"\t- unavailable"+bcolors.ENDC
+
+def printResults():
+	for i in sorted(validatedResults.items(),key=operator.itemgetter(1), reverse=True):
+		print (i[0]+".com\t"+str(i[1])+"%")
 
 
 
@@ -419,7 +445,7 @@ def main():
 	# ================================================================
 	Verbose = False
 	domainResolution = False
-	domain = sys.argv[1]
+	domain = sys.argv[1] 
 
 	for i in range(2, len(sys.argv)):
 		if sys.argv[i] == '-v':
@@ -428,28 +454,21 @@ def main():
 		if sys.argv[i] == '-d':
 			domainResolution = True
 
-
-	
 	chars = getPossibleChars()
-	if Verbose:
-		print chars
-
 	m = (len(chars),target+1)
 	m = np.zeros(m)
 
-
 	populatematrix()
+	reconstructCombinations()
+
 	if Verbose:
 		print m
-		print ""
-
-	reconstructCombinations()
 	print "The following visually similar strings were found:"
 	
+	aux.printmatrix(m,chars)
 	validateResults()
 
-	#checkAvailableDomains()
-
+	
 
 
 	#Testing
