@@ -322,7 +322,7 @@ def reconstruct(i,j,listOfSubs):
 		listOfSubs.append(chars[i])
 		if Verbose:
 			print "\t3.2 -- Jump left",i,j,m[i-1][j],1+ m[i][j-chars[i][2]]
-		reconstruct(i-1,j,listOfSubs)
+		reconstruct(i,j-chars[i][2],listOfSubs)
 # BUG HERE? jump left or up ? what's the right way
 
 		# Value can come from both directions.
